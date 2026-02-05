@@ -36,7 +36,7 @@ def get_create_example_use_case(
         repository = get_example_repository()
     if event_publisher is None:
         event_publisher = get_event_publisher()
-    
+
     return CreateExampleUseCase(repository, event_publisher)
 
 
@@ -46,7 +46,7 @@ def get_get_example_use_case(
     """Get get example use case."""
     if repository is None:
         repository = get_example_repository()
-    
+
     return GetExampleUseCase(repository)
 
 
@@ -56,5 +56,5 @@ def get_list_examples_use_case(
     """Get list examples use case."""
     if repository is None:
         repository = get_example_repository()
-    
+
     return ListExamplesUseCase(repository)

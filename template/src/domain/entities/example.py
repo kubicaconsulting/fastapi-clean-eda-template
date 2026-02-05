@@ -30,6 +30,6 @@ class ExampleEntity:
         """Update entity name."""
         if not name or not name.strip():
             raise ValueError("Name cannot be empty")
-        
+
         self.name = name.strip()
         self.updated_at = datetime.utcnow()

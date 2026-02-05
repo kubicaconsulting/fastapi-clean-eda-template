@@ -23,7 +23,7 @@ class Database:
         try:
             # Parse MongoDB URL
             mongodb_url = str(settings.mongodb_url)
-            
+
             cls.client = AsyncIOMotorClient(
                 mongodb_url,
                 minPoolSize=settings.mongodb_min_pool_size,

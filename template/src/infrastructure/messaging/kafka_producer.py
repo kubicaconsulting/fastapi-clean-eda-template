@@ -23,12 +23,12 @@ class KafkaProducer:
         """Initialize Kafka producer."""
         try:
             cls._settings = settings
-            
+
             cls._producer = AIOKafkaProducer(
                 bootstrap_servers=settings.kafka_bootstrap_servers.split(","),
                 value_serializer=cls._serialize_avro,
             )
-            
+
             await cls._producer.start()
             logger.info(
                 "kafka_producer_started",
@@ -51,10 +51,10 @@ class KafkaProducer:
         # Extract schema and data from message
         schema = value.get("schema")
         data = value.get("data")
-        
+
         if not schema or not data:
             raise ValueError("Message must contain 'schema' and 'data' keys")
-        
+
         # Serialize using fastavro
         output = io.BytesIO()
         fastavro.schemaless_writer(output, schema, data)
@@ -70,7 +70,7 @@ class KafkaProducer:
     ) -> None:
         """
         Send message to Kafka topic.
-        
+
         Args:
             topic: Kafka topic name
             value: Message value with 'schema' and 'data' keys
@@ -83,14 +83,14 @@ class KafkaProducer:
         try:
             key_bytes = key.encode("utf-8") if key else None
             headers_list = [(k, v) for k, v in headers.items()] if headers else None
-            
+
             await cls._producer.send(
                 topic=topic,
                 value=value,
                 key=key_bytes,
                 headers=headers_list,
             )
-            
+
             logger.debug(
                 "kafka_message_sent",
                 topic=topic,
@@ -116,7 +116,7 @@ class KafkaProducer:
 
         try:
             batch = cls._producer.create_batch()
-            
+
             for msg in messages:
                 metadata = batch.append(
                     key=None,
@@ -128,11 +128,11 @@ class KafkaProducer:
                     await cls._producer.send_batch(batch, topic)
                     batch = cls._producer.create_batch()
                     batch.append(key=None, value=msg, timestamp=None)
-            
+
             # Send remaining messages
             if not batch.is_empty():
                 await cls._producer.send_batch(batch, topic)
-            
+
             logger.info(
                 "kafka_batch_sent",
                 topic=topic,

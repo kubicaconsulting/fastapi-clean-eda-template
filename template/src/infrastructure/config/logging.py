@@ -8,7 +8,9 @@ import structlog
 from structlog.typing import EventDict, Processor
 
 
-def add_correlation_id(logger: Any, method_name: str, event_dict: EventDict) -> EventDict:
+def add_correlation_id(
+    logger: Any, method_name: str, event_dict: EventDict
+) -> EventDict:
     """Add correlation ID to log events."""
     from contextvars import ContextVar
 

@@ -31,7 +31,7 @@ class BeanieExampleRepository(ExampleRepository):
         document = await ExampleDocument.get(entity_id)
         if not document:
             return None
-        
+
         return self._to_entity(document)
 
     async def get_by_email(self, email: str) -> Optional[ExampleEntity]:
@@ -39,7 +39,7 @@ class BeanieExampleRepository(ExampleRepository):
         document = await ExampleDocument.find_one(ExampleDocument.email == email)
         if not document:
             return None
-        
+
         return self._to_entity(document)
 
     async def list(
@@ -54,12 +54,12 @@ class BeanieExampleRepository(ExampleRepository):
         document = await ExampleDocument.get(entity.id)
         if not document:
             raise ValueError(f"Entity with id {entity.id} not found")
-        
+
         document.name = entity.name
         document.email = entity.email
         document.is_active = entity.is_active
         document.updated_at = entity.updated_at
-        
+
         await document.save()
         return entity
 
@@ -68,7 +68,7 @@ class BeanieExampleRepository(ExampleRepository):
         document = await ExampleDocument.get(entity_id)
         if not document:
             return False
-        
+
         await document.delete()
         return True
 

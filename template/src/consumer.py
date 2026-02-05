@@ -14,10 +14,10 @@ logger = get_logger(__name__)
 async def example_event_handler(message: dict) -> None:
     """Handle example events."""
     logger.info("event_received", message=message)
-    
+
     # Process the event
     # Example: update database, trigger other actions, etc.
-    
+
     # For demo purposes, just log it
     event_type = message.get("event_type", "unknown")
     logger.info(f"processing_{event_type}", data=message)
@@ -26,29 +26,29 @@ async def example_event_handler(message: dict) -> None:
 async def main():
     """Main consumer entry point."""
     settings = get_settings()
-    
+
     # Setup logging
     setup_logging(
         log_level=settings.log_level,
         json_logs=settings.environment == "production",
     )
-    
+
     logger.info("consumer_starting", topics=settings.kafka_topics_list)
-    
+
     try:
         # Initialize dependencies
         await Database.connect(settings)
         await KafkaConsumer.start(settings)
-        
+
         # Register event handlers
         for topic in settings.kafka_topics_list:
             KafkaConsumer.register_handler(topic, example_event_handler)
-        
+
         logger.info("consumer_started")
-        
+
         # Start consuming
         await KafkaConsumer.consume()
-        
+
     except KeyboardInterrupt:
         logger.info("consumer_interrupted")
     except Exception as e:

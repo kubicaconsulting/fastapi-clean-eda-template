@@ -26,7 +26,7 @@ class KafkaConsumer:
         """Initialize Kafka consumer."""
         try:
             cls._settings = settings
-            
+
             cls._consumer = AIOKafkaConsumer(
                 *settings.kafka_topics_list,
                 bootstrap_servers=settings.kafka_bootstrap_servers.split(","),
@@ -36,7 +36,7 @@ class KafkaConsumer:
                 max_poll_records=settings.kafka_max_poll_records,
                 value_deserializer=cls._deserialize_avro,
             )
-            
+
             await cls._consumer.start()
             logger.info(
                 "kafka_consumer_started",
@@ -62,7 +62,7 @@ class KafkaConsumer:
             # For schemaless reading, you need to provide the schema
             # In production, fetch schema from Schema Registry
             input_stream = io.BytesIO(value)
-            
+
             # This is a simplified example - in production, use Schema Registry
             # to fetch and cache schemas
             return {"raw": value.decode("utf-8", errors="ignore")}

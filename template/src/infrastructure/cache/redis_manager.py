@@ -24,7 +24,7 @@ class RedisManager:
         try:
             cls._settings = settings
             redis_url = str(settings.redis_url)
-            
+
             cls._client = redis.from_url(
                 redis_url,
                 max_connections=settings.redis_max_connections,
@@ -65,9 +65,9 @@ class RedisManager:
         settings = cls._settings
         if not settings:
             raise RuntimeError("Redis settings not initialized")
-            
+
         full_key = f"{settings.cache_key_prefix}{key}"
-        
+
         try:
             value = await client.get(full_key)
             if value:
@@ -86,7 +86,7 @@ class RedisManager:
         settings = cls._settings
         if not settings:
             raise RuntimeError("Redis settings not initialized")
-            
+
         full_key = f"{settings.cache_key_prefix}{key}"
         ttl = ttl or settings.cache_ttl
 
@@ -105,7 +105,7 @@ class RedisManager:
         settings = cls._settings
         if not settings:
             raise RuntimeError("Redis settings not initialized")
-            
+
         full_key = f"{settings.cache_key_prefix}{key}"
 
         try:
@@ -119,12 +119,12 @@ class RedisManager:
     async def check_rate_limit(cls, key: str, limit: int, window: int = 60) -> bool:
         """
         Check if rate limit is exceeded.
-        
+
         Args:
             key: Rate limit key (e.g., IP address)
             limit: Maximum requests allowed
             window: Time window in seconds
-            
+
         Returns:
             True if request is allowed, False if rate limit exceeded
         """
@@ -132,7 +132,7 @@ class RedisManager:
         settings = cls._settings
         if not settings:
             raise RuntimeError("Redis settings not initialized")
-            
+
         rate_key = f"{settings.cache_key_prefix}rate:{key}"
 
         try:
@@ -140,7 +140,7 @@ class RedisManager:
             pipe.incr(rate_key)
             pipe.expire(rate_key, window)
             results = await pipe.execute()
-            
+
             count = results[0]
             return count <= limit
         except Exception as e:

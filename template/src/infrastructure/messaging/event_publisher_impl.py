@@ -38,12 +38,12 @@ class KafkaEventPublisher(EventPublisher):
         """Publish multiple events in a batch."""
         # Group events by topic
         topics_events: dict[str, list[dict[str, Any]]] = {}
-        
+
         for event, topic in events:
             if topic not in topics_events:
                 topics_events[topic] = []
             topics_events[topic].append(self._prepare_message(event))
-        
+
         # Send batches per topic
         for topic, messages in topics_events.items():
             await KafkaProducer.send_batch(topic, messages)
@@ -51,13 +51,13 @@ class KafkaEventPublisher(EventPublisher):
     def _prepare_message(self, event: DomainEvent) -> dict[str, Any]:
         """Prepare event for Kafka with Avro schema."""
         event_dict = asdict(event)
-        
+
         # Convert all values to strings for the simple schema
         payload = {
-            k: str(v) for k, v in event_dict.items() 
+            k: str(v) for k, v in event_dict.items()
             if k not in ["event_id", "event_type", "timestamp"]
         }
-        
+
         return {
             "schema": self.EVENT_SCHEMA,
             "data": {

@@ -17,13 +17,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         """Process request with rate limiting."""
         settings = get_settings()
-        
+
         if not settings.rate_limit_enabled:
             return await call_next(request)
 
         # Get client IP
         client_ip = request.client.host if request.client else "unknown"
-        
+
         # Skip rate limiting for health checks
         if request.url.path in ["/health", "/metrics"]:
             return await call_next(request)
