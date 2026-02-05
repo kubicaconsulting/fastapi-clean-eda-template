@@ -1,0 +1,235 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+## Architecture
+
+This microservice follows:
+- **12-Factor App** principles for cloud-native deployment
+- **Clean Architecture** for maintainable, testable code
+- **Event-Driven Architecture** for asynchronous communication
+- **Domain-Driven Design** patterns
+
+## Tech Stack
+
+- **Framework**: FastAPI
+- **Package Manager**: uv
+- **Database**: MongoDB with Beanie ODM
+- **Caching**: Redis
+- **Messaging**: Kafka with Avro serialization
+- **Observability**: OpenTelemetry (optional)
+
+## Project Structure
+
+```
+src/{{ project_slug }}/
+├── domain/              # Business entities and domain logic
+│   ├── entities/
+│   ├── value_objects/
+│   └── events/
+├── application/         # Use cases and business workflows
+│   ├── use_cases/
+│   ├── ports/          # Interfaces (dependency inversion)
+│   └── dto/
+├── infrastructure/      # External concerns
+│   ├── database/
+│   ├── cache/
+│   ├── messaging/
+│   └── config/
+└── presentation/        # API layer
+    ├── api/
+    └── middleware/
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Python {{ python_version }}+
+- uv package manager
+- Docker and Docker Compose (for local development)
+
+### Installation
+
+1. **Install uv** (if not already installed):
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. **Install dependencies**:
+```bash
+uv pip install -e ".[dev]"
+```
+
+3. **Copy environment file**:
+```bash
+cp .env.example .env
+```
+
+4. **Update .env** with your configuration
+
+### Running Locally with Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+
+# Stop services
+docker-compose down
+```
+
+The API will be available at `http://localhost:{{ service_port }}`
+
+### Running Without Docker
+
+1. **Start MongoDB**:
+```bash
+mongod --dbpath ./data/db
+```
+
+2. **Start Redis**:
+```bash
+redis-server
+```
+
+3. **Start Kafka** (follow Kafka quickstart guide)
+
+4. **Run the application**:
+```bash
+uvicorn {{ project_slug }}.main:app --reload
+```
+
+5. **Run the event consumer** (in separate terminal):
+```bash
+python -m {{ project_slug }}.consumer
+```
+
+## API Documentation
+
+Once running, visit:
+- Swagger UI: `http://localhost:{{ service_port }}/docs`
+- ReDoc: `http://localhost:{{ service_port }}/redoc`
+
+## Development
+
+### Code Quality
+
+```bash
+# Format code
+ruff format .
+
+# Lint code
+ruff check .
+
+# Type check
+mypy src/
+```
+
+### Testing
+
+```bash
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=src --cov-report=html
+
+# View coverage report
+open htmlcov/index.html
+```
+
+## Deployment
+
+### Build Docker Image
+
+```bash
+docker build -t {{ project_slug }}:latest .
+```
+
+### Environment Variables
+
+See `.env.example` for all configuration options. Key variables:
+
+- `MONGODB_URL`: MongoDB connection string
+- `REDIS_URL`: Redis connection string
+- `KAFKA_BOOTSTRAP_SERVERS`: Kafka brokers
+- `JWT_SECRET_KEY`: Secret key for JWT (if authentication enabled)
+
+## Event-Driven Architecture
+
+### Publishing Events
+
+```python
+from {{ project_slug }}.domain.events.example_events import ExampleCreatedEvent
+from {{ project_slug }}.infrastructure.messaging.event_publisher_impl import KafkaEventPublisher
+
+publisher = KafkaEventPublisher()
+event = ExampleCreatedEvent(example_id=uuid4(), name="Test", email="test@example.com")
+await publisher.publish(event, "example-events")
+```
+
+### Consuming Events
+
+Event handlers are registered in `consumer.py`. Add new handlers:
+
+```python
+async def my_event_handler(message: dict) -> None:
+    # Process event
+    pass
+
+KafkaConsumer.register_handler("my-topic", my_event_handler)
+```
+
+## Clean Architecture Principles
+
+- **Domain Layer**: Pure business logic, no dependencies on frameworks
+- **Application Layer**: Use cases orchestrate domain objects
+- **Infrastructure Layer**: Implements technical details
+- **Presentation Layer**: API endpoints and request/response handling
+
+### Dependency Rule
+
+Dependencies flow inward:
+- Presentation → Application → Domain
+- Infrastructure → Application → Domain
+
+## Rate Limiting
+
+Rate limiting is enabled by default using Redis. Configure in `.env`:
+
+```env
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_PER_MINUTE=60
+```
+
+## Monitoring
+
+{% if use_observability %}
+### OpenTelemetry
+
+Traces are exported to the configured OTLP endpoint:
+
+```env
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+OTEL_SERVICE_NAME={{ project_slug }}
+```
+
+View traces in Jaeger, Tempo, or your preferred backend.
+{% endif %}
+
+### Health Check
+
+```bash
+curl http://localhost:{{ service_port }}/health
+```
+
+## License
+
+[Your License Here]
+
+## Author
+
+{{ author_name }} <{{ author_email }}>

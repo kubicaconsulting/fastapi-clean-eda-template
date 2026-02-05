@@ -1,0 +1,122 @@
+"""Main FastAPI application."""
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from {{ project_slug }}.infrastructure.cache.redis_manager import RedisManager
+from {{ project_slug }}.infrastructure.config.logging import get_logger, setup_logging
+from {{ project_slug }}.infrastructure.config.settings import get_settings
+from {{ project_slug }}.infrastructure.database.database import Database
+from {{ project_slug }}.infrastructure.messaging.kafka_producer import KafkaProducer
+from {{ project_slug }}.presentation.api.v1.routes import examples
+from {{ project_slug }}.presentation.middleware.correlation_id import (
+    CorrelationIdMiddleware,
+)
+from {{ project_slug }}.presentation.middleware.rate_limit import RateLimitMiddleware
+
+{% if use_observability %}
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+{% endif %}
+
+logger = get_logger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan manager."""
+    settings = get_settings()
+    
+    # Setup logging
+    setup_logging(
+        log_level=settings.log_level,
+        json_logs=settings.environment == "production",
+    )
+    
+    logger.info(
+        "application_starting",
+        app_name=settings.app_name,
+        environment=settings.environment,
+    )
+    
+    # Initialize infrastructure
+    await Database.connect(settings)
+    await RedisManager.connect(settings)
+    await KafkaProducer.start(settings)
+    
+    logger.info("application_started")
+    
+    yield
+    
+    # Cleanup
+    logger.info("application_stopping")
+    await KafkaProducer.stop()
+    await RedisManager.close()
+    await Database.close()
+    logger.info("application_stopped")
+
+
+def create_app() -> FastAPI:
+    """Create and configure FastAPI application."""
+    settings = get_settings()
+    
+    {% if use_observability %}
+    # Setup OpenTelemetry
+    resource = Resource(attributes={SERVICE_NAME: settings.otel_service_name})
+    tracer_provider = TracerProvider(resource=resource)
+    
+    otlp_exporter = OTLPSpanExporter(
+        endpoint=settings.otel_exporter_otlp_endpoint,
+        insecure=True,
+    )
+    
+    tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+    trace.set_tracer_provider(tracer_provider)
+    {% endif %}
+    
+    # Create FastAPI app
+    app = FastAPI(
+        title=settings.app_name,
+        version=settings.app_version,
+        description="{{ project_description }}",
+        lifespan=lifespan,
+        debug=settings.debug,
+    )
+    
+    {% if use_observability %}
+    # Instrument FastAPI with OpenTelemetry
+    FastAPIInstrumentor.instrument_app(app)
+    {% endif %}
+    
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allowed_origins,
+        allow_credentials=settings.cors_allow_credentials,
+        allow_methods=settings.cors_allowed_methods,
+        allow_headers=settings.cors_allowed_headers,
+    )
+    
+    # Add custom middleware
+    app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(RateLimitMiddleware)
+    
+    # Register routers
+    app.include_router(examples.router, prefix="/api/v1")
+    
+    # Health check endpoint
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint."""
+        return {"status": "healthy", "version": settings.app_version}
+    
+    return app
+
+
+app = create_app()

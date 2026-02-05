@@ -1,0 +1,67 @@
+_subdirectory: template
+
+# Project metadata
+project_name:
+  type: str
+  help: Project name (e.g., user-service)
+  placeholder: my-service
+
+project_slug:
+  type: str
+  help: Python package name (snake_case)
+  default: "{{ project_name.lower().replace('-', '_').replace(' ', '_') }}"
+
+project_description:
+  type: str
+  help: Short description of the service
+  default: A modern FastAPI microservice
+
+author_name:
+  type: str
+  help: Author name
+  default: Your Name
+
+author_email:
+  type: str
+  help: Author email
+  default: you@example.com
+
+# Service configuration
+service_port:
+  type: int
+  help: Service HTTP port
+  default: 8000
+
+python_version:
+  type: str
+  help: Python version
+  default: "3.12"
+  choices:
+    - "3.11"
+    - "3.12"
+
+# Database
+mongodb_database:
+  type: str
+  help: MongoDB database name
+  default: "{{ project_slug }}_db"
+
+# Messaging
+kafka_topics:
+  type: str
+  help: Comma-separated Kafka topics to consume
+  default: "{{ project_slug }}_events"
+
+# Features
+use_authentication:
+  type: bool
+  help: Include JWT authentication?
+  default: true
+
+use_observability:
+  type: bool
+  help: Include OpenTelemetry tracing?
+  default: true
+
+# Versioning
+_min_copier_version: "9.0.0"
