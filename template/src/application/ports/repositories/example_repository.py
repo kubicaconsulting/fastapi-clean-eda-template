@@ -1,7 +1,6 @@
 """Repository port - interface for data access (Dependency Inversion Principle)."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from uuid import UUID
 
 from domain.entities.example import ExampleEntity
@@ -16,12 +15,12 @@ class ExampleRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, entity_id: UUID) -> Optional[ExampleEntity]:
+    async def get_by_id(self, entity_id: UUID) -> ExampleEntity | None:
         """Get entity by ID."""
         pass
 
     @abstractmethod
-    async def get_by_email(self, email: str) -> Optional[ExampleEntity]:
+    async def get_by_email(self, email: str) -> ExampleEntity | None:
         """Get entity by email."""
         pass
 

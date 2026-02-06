@@ -41,7 +41,7 @@ class KafkaSettings(BaseModel):
     consumer_group: str = Field(
         default="{{ project_slug }}_consumer_group", description="Kafka consumer group"
     )
-    topics: str = Field(
+    kafka_topics: str = Field(
         default="{{ kafka_topics }}", description="Comma-separated Kafka topics"
     )
     auto_offset_reset: Literal["earliest", "latest"] = Field(
@@ -51,11 +51,14 @@ class KafkaSettings(BaseModel):
         default=True, description="Enable Kafka auto commit"
     )
     max_poll_records: int = Field(default=100, description="Max records per poll")
-
-    # Schema Registry
     schema_registry_url: str = Field(
         default="http://localhost:8081", description="Schema Registry URL"
     )
+
+    @property
+    def topics(self) -> list[str]:
+        """Get Kafka topics as a list."""
+        return [topic.strip() for topic in self.kafka_topics.split(",")]
 
 
 class CORSSettings(BaseModel):
@@ -117,8 +120,3 @@ class Settings(BaseModel):
     ld: LDSettings
     jwt: JWTSettings
     kafka: KafkaSettings
-
-    @property
-    def kafka_topics(self) -> list[str]:
-        """Get Kafka topics as a list."""
-        return [topic.strip() for topic in self.kafka_topics.split(",")]

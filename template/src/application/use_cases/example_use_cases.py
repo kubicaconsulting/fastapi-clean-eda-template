@@ -3,13 +3,12 @@
 from uuid import UUID
 
 from application.dto.example_dto import CreateExampleDTO, ExampleDTO
-from application.ports.messaging.event_publisher import EventPublisher
-from application.ports.repositories.example_repository import (
-    ExampleRepository,
-)
+
+# from application.ports.messaging.event_publisher import EventPublisher
+# from domain.events.example_events import ExampleCreatedEvent
+from application.ports.repositories.example_repository import ExampleRepository
 from domain.entities.example import ExampleEntity
-from domain.events.example_events import ExampleCreatedEvent
-from infra.config.logging import get_logger
+from infra.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -20,11 +19,11 @@ class CreateExampleUseCase:
     def __init__(
         self,
         repository: ExampleRepository,
-        event_publisher: EventPublisher,
+        # event_publisher: EventPublisher,
     ):
         """Initialize use case with dependencies."""
         self.repository = repository
-        self.event_publisher = event_publisher
+        # self.event_publisher = event_publisher
 
     async def execute(self, dto: CreateExampleDTO) -> ExampleDTO:
         """
@@ -51,12 +50,12 @@ class CreateExampleUseCase:
         created_entity = await self.repository.create(entity)
 
         # Publish domain event
-        event = ExampleCreatedEvent(
-            example_id=created_entity.id,
-            name=created_entity.name,
-            email=created_entity.email,
-        )
-        await self.event_publisher.publish(event, "example-events")
+        # event = ExampleCreatedEvent(
+        #     example_id=created_entity.id,
+        #     name=created_entity.name,
+        #     email=created_entity.email,
+        # )
+        # await self.event_publisher.publish(event, "example-events")
 
         logger.info(
             "example_created",

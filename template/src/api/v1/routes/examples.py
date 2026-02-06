@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from infra.errors import ValidationException, ResourceNotFoundException
 from application.dto.example_dto import (
     CreateExampleDTO,
     ExampleDTO,
@@ -36,10 +37,9 @@ async def create_example(
     try:
         return await use_case.execute(data)
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
+        raise ValidationException(
+            status=status.HTTP_400_BAD_REQUEST, message=str(e)
+        ) from e
 
 
 @router.get(
@@ -54,9 +54,9 @@ async def get_example(
     """Get an example by ID."""
     result = await use_case.execute(example_id)
     if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Example with id {example_id} not found",
+        raise ResourceNotFoundException(
+            status=status.HTTP_404_NOT_FOUND,
+            message=f"Example with id {example_id} not found",
         )
     return result
 

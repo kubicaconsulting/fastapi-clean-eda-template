@@ -1,30 +1,24 @@
 """FastAPI dependencies for dependency injection."""
 
+# from infra.messaging.event_publisher_impl import KafkaEventPublisher
 from application.ports.messaging.event_publisher import EventPublisher
-from application.ports.repositories.example_repository import (
-    ExampleRepository,
-)
+from application.ports.repositories.example_repository import ExampleRepository
+from infra.database.repositories.example_repository import BeanieExampleRepository
 from application.use_cases.example_use_cases import (
     CreateExampleUseCase,
     GetExampleUseCase,
     ListExamplesUseCase,
 )
-from infra.database.repositories.example_repository import (
-    BeanieExampleRepository,
-)
-from infra.messaging.event_publisher_impl import (
-    KafkaEventPublisher,
-)
+
+
+def get_event_publisher() -> EventPublisher:
+    """Get event publisher instance."""
+    # return KafkaEventPublisher()
 
 
 def get_example_repository() -> ExampleRepository:
     """Get example repository instance."""
     return BeanieExampleRepository()
-
-
-def get_event_publisher() -> EventPublisher:
-    """Get event publisher instance."""
-    return KafkaEventPublisher()
 
 
 def get_create_example_use_case(

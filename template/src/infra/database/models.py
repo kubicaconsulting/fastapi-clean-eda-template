@@ -1,6 +1,6 @@
 """Database models using Beanie ODM."""
 
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 from beanie import Document, Indexed
@@ -14,8 +14,8 @@ class ExampleDocument(Document):
     email: Indexed(EmailStr, unique=True)  # type: ignore
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.now())
-    updated_at: datetime = Field(default_factory=datetime.now())
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Settings:
         """Beanie settings."""

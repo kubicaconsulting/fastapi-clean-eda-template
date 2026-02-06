@@ -1,7 +1,7 @@
 """Domain events for event-driven architecture."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 from uuid import UUID, uuid4
 
 
@@ -26,7 +26,7 @@ class ExampleCreatedEvent(DomainEvent):
         """Initialize event."""
         super().__init__(
             event_id=uuid4(),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             event_type="example.created",
         )
         self.example_id = example_id
@@ -45,7 +45,7 @@ class ExampleUpdatedEvent(DomainEvent):
         """Initialize event."""
         super().__init__(
             event_id=uuid4(),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             event_type="example.updated",
         )
         self.example_id = example_id
@@ -62,7 +62,7 @@ class ExampleDeletedEvent(DomainEvent):
         """Initialize event."""
         super().__init__(
             event_id=uuid4(),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             event_type="example.deleted",
         )
         self.example_id = example_id
