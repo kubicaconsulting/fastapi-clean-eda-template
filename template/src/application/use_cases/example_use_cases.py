@@ -2,14 +2,14 @@
 
 from uuid import UUID
 
-from {{ project_slug }}.application.dto.example_dto import CreateExampleDTO, ExampleDTO
-from {{ project_slug }}.application.ports.messaging.event_publisher import EventPublisher
-from {{ project_slug }}.application.ports.repositories.example_repository import (
+from application.dto.example_dto import CreateExampleDTO, ExampleDTO
+from application.ports.messaging.event_publisher import EventPublisher
+from application.ports.repositories.example_repository import (
     ExampleRepository,
 )
-from {{ project_slug }}.domain.entities.example import ExampleEntity
-from {{ project_slug }}.domain.events.example_events import ExampleCreatedEvent
-from {{ project_slug }}.infrastructure.config.logging import get_logger
+from domain.entities.example import ExampleEntity
+from domain.events.example_events import ExampleCreatedEvent
+from infra.config.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -29,10 +29,10 @@ class CreateExampleUseCase:
     async def execute(self, dto: CreateExampleDTO) -> ExampleDTO:
         """
         Execute the create example use case.
-        
+
         Args:
             dto: Data transfer object with creation data
-            
+
         Returns:
             Created example DTO
         """
@@ -78,17 +78,17 @@ class GetExampleUseCase:
     async def execute(self, example_id: UUID) -> ExampleDTO | None:
         """
         Get example by ID.
-        
+
         Args:
             example_id: Example ID
-            
+
         Returns:
             Example DTO or None if not found
         """
         entity = await self.repository.get_by_id(example_id)
         if not entity:
             return None
-        
+
         return ExampleDTO.from_entity(entity)
 
 
@@ -99,16 +99,14 @@ class ListExamplesUseCase:
         """Initialize use case with dependencies."""
         self.repository = repository
 
-    async def execute(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[ExampleDTO]:
+    async def execute(self, skip: int = 0, limit: int = 100) -> list[ExampleDTO]:
         """
         List examples with pagination.
-        
+
         Args:
             skip: Number of items to skip
             limit: Maximum number of items to return
-            
+
         Returns:
             List of example DTOs
         """

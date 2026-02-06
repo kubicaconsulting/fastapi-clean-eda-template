@@ -2,10 +2,11 @@
 
 import asyncio
 
-from {{ project_slug }}.infrastructure.config.logging import get_logger, setup_logging
-from {{ project_slug }}.infrastructure.config.settings import get_settings
-from {{ project_slug }}.infrastructure.database.database import Database
-from {{ project_slug }}.infrastructure.messaging.kafka_consumer import KafkaConsumer
+from infra.logging import get_logger, setup_logging
+from config.main import get_settings
+from config.interfaces import Environments
+from infra.database.database import Database
+from infra.messaging.kafka_consumer import KafkaConsumer
 
 
 logger = get_logger(__name__)
@@ -30,10 +31,10 @@ async def main():
     # Setup logging
     setup_logging(
         log_level=settings.log_level,
-        json_logs=settings.environment == "production",
+        json_logs=settings.env == Environments.PRODUCTION,
     )
 
-    logger.info("consumer_starting", topics=settings.kafka_topics_list)
+    logger.info("consumer_starting", topics=settings.kafka.topics)
 
     try:
         # Initialize dependencies
@@ -41,7 +42,7 @@ async def main():
         await KafkaConsumer.start(settings)
 
         # Register event handlers
-        for topic in settings.kafka_topics_list:
+        for topic in settings.kafka.topics:
             KafkaConsumer.register_handler(topic, example_event_handler)
 
         logger.info("consumer_started")

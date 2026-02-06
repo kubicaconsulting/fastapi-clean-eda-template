@@ -1,18 +1,18 @@
 """FastAPI dependencies for dependency injection."""
 
-from {{ project_slug }}.application.ports.messaging.event_publisher import EventPublisher
-from {{ project_slug }}.application.ports.repositories.example_repository import (
+from application.ports.messaging.event_publisher import EventPublisher
+from application.ports.repositories.example_repository import (
     ExampleRepository,
 )
-from {{ project_slug }}.application.use_cases.example_use_cases import (
+from application.use_cases.example_use_cases import (
     CreateExampleUseCase,
     GetExampleUseCase,
     ListExamplesUseCase,
 )
-from {{ project_slug }}.infrastructure.database.repositories.example_repository import (
+from infra.database.repositories.example_repository import (
     BeanieExampleRepository,
 )
-from {{ project_slug }}.infrastructure.messaging.event_publisher_impl import (
+from infra.messaging.event_publisher_impl import (
     KafkaEventPublisher,
 )
 

@@ -4,16 +4,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from {{ project_slug }}.application.dto.example_dto import (
+from application.dto.example_dto import (
     CreateExampleDTO,
     ExampleDTO,
 )
-from {{ project_slug }}.application.use_cases.example_use_cases import (
+from application.use_cases.example_use_cases import (
     CreateExampleUseCase,
     GetExampleUseCase,
     ListExamplesUseCase,
 )
-from {{ project_slug }}.presentation.api.v1.dependencies import (
+from api.v1.dependencies import (
     get_create_example_use_case,
     get_get_example_use_case,
     get_list_examples_use_case,

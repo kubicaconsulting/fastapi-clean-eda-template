@@ -15,7 +15,7 @@ services:
       - kafka
     volumes:
       - ./src:/app/src
-    command: uvicorn {{ project_slug }}.main:app --host 0.0.0.0 --port {{ service_port }} --reload
+    command: uvicorn main:app --host 0.0.0.0 --port {{ service_port }} --reload
 
   consumer:
     build: .
@@ -29,7 +29,7 @@ services:
       - kafka
     volumes:
       - ./src:/app/src
-    command: python -m {{ project_slug }}.consumer
+    command: python -m consumer
 
   mongodb:
     image: mongo:7

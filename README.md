@@ -52,7 +52,7 @@ The template will ask you:
 - Python version (3.11 or 3.12)
 - MongoDB database name
 - Kafka topics
-- Optional features (authentication, observability)
+- Optional features (authentication, observability, launchdarkly)
 
 ### 4. Navigate to Your Project
 
@@ -76,21 +76,24 @@ make dev
 ```
 my-service/
 ├── src/
-│   └── my_service/
-│       ├── domain/              # Business logic (entities, events)
-│       ├── application/         # Use cases and ports
-│       ├── infrastructure/      # Technical implementations
-│       │   ├── database/       # Beanie repositories
-│       │   ├── cache/          # Redis manager
-│       │   ├── messaging/      # Kafka producer/consumer
-│       │   └── config/         # Settings and logging
-│       └── presentation/        # FastAPI routes and middleware
+│   ├── domain/              # Business logic (entities, events)
+│   ├── application/         # Use cases and ports
+│   ├── infrastructure/      # Technical implementations
+│   │   ├── database/       # Beanie repositories
+│   │   ├── cache/          # Redis manager
+│   │   ├── messaging/      # Kafka producer/consumer
+│   │   └── config/         # Settings and logging
+│   └── presentation/        # FastAPI routes and middleware
 ├── tests/
 │   ├── unit/
 │   └── integration/
 ├── docker-compose.yml
 ├── Dockerfile
 ├── pyproject.toml
+├── ruff.toml
+├── pytest.toml
+├── conftest.py
+├── .python-version
 ├── Makefile
 └── README.md
 ```

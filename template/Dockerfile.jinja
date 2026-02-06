@@ -19,4 +19,4 @@ COPY src/ ./src/
 EXPOSE {{ service_port }}
 
 # Run application
-CMD ["uvicorn", "{{ project_slug }}.main:app", "--host", "0.0.0.0", "--port", "{{ service_port }}"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "{{ service_port }}"]

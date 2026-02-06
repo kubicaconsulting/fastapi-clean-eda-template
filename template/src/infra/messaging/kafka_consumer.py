@@ -7,8 +7,8 @@ from typing import Any, Callable
 import fastavro
 from aiokafka import AIOKafkaConsumer
 
-from {{ project_slug }}.infrastructure.config.logging import get_logger
-from {{ project_slug }}.infrastructure.config.settings import Settings
+from infra.logging import get_logger
+from config import Settings
 
 logger = get_logger(__name__)
 
@@ -28,20 +28,20 @@ class KafkaConsumer:
             cls._settings = settings
 
             cls._consumer = AIOKafkaConsumer(
-                *settings.kafka_topics_list,
-                bootstrap_servers=settings.kafka_bootstrap_servers.split(","),
-                group_id=settings.kafka_consumer_group,
-                auto_offset_reset=settings.kafka_auto_offset_reset,
-                enable_auto_commit=settings.kafka_enable_auto_commit,
-                max_poll_records=settings.kafka_max_poll_records,
+                *settings.kafka.topics,
+                bootstrap_servers=settings.kafka.bootstrap_servers.split(","),
+                group_id=settings.kafka.consumer_group,
+                auto_offset_reset=settings.kafka.auto_offset_reset,
+                enable_auto_commit=settings.kafka.enable_auto_commit,
+                max_poll_records=settings.kafka.max_poll_records,
                 value_deserializer=cls._deserialize_avro,
             )
 
             await cls._consumer.start()
             logger.info(
                 "kafka_consumer_started",
-                topics=settings.kafka_topics_list,
-                group_id=settings.kafka_consumer_group,
+                topics=settings.kafka.topics,
+                group_id=settings.kafka.consumer_group,
             )
         except Exception as e:
             logger.error("kafka_consumer_start_failed", error=str(e))
@@ -154,9 +154,7 @@ class SchemaRegistry:
 
         raise NotImplementedError("Schema Registry integration not implemented")
 
-    async def register_schema(
-        self, subject: str, schema: dict[str, Any]
-    ) -> int:
+    async def register_schema(self, subject: str, schema: dict[str, Any]) -> int:
         """Register a new schema."""
         # Implement schema registration
         # This is a placeholder

@@ -5,8 +5,8 @@ from typing import Any
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from {{ project_slug }}.infrastructure.config.logging import get_logger
-from {{ project_slug }}.infrastructure.config.settings import Settings
+from infra.logging import get_logger
+from config import Settings
 
 logger = get_logger(__name__)
 
@@ -22,17 +22,17 @@ class Database:
         """Initialize database connection and Beanie ODM."""
         try:
             # Parse MongoDB URL
-            mongodb_url = str(settings.mongodb_url)
+            mongodb_url = str(settings.database.url)
 
             cls.client = AsyncIOMotorClient(
                 mongodb_url,
-                minPoolSize=settings.mongodb_min_pool_size,
-                maxPoolSize=settings.mongodb_max_pool_size,
+                minPoolSize=settings.database.min_pool_size,
+                maxPoolSize=settings.database.max_pool_size,
             )
-            cls.database_name = settings.mongodb_database
+            cls.database_name = settings.database.name
 
             # Import all document models here
-            from {{ project_slug }}.infrastructure.database.models import get_document_models
+            from src.infra.database.models import get_document_models
 
             await init_beanie(
                 database=cls.client[cls.database_name],

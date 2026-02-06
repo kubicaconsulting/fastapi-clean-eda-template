@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from {{ project_slug }}.domain.entities.example import ExampleEntity
+from domain.entities.example import ExampleEntity
 
 
 class CreateExampleDTO(BaseModel):

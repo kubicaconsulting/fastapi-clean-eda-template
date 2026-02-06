@@ -1,13 +1,12 @@
 """Repository implementation using Beanie ODM."""
 
-from typing import Optional
 from uuid import UUID
 
-from {{ project_slug }}.application.ports.repositories.example_repository import (
+from application.ports.repositories.example_repository import (
     ExampleRepository,
 )
-from {{ project_slug }}.domain.entities.example import ExampleEntity
-from {{ project_slug }}.infrastructure.database.models import ExampleDocument
+from application.domain.entities.example import ExampleEntity
+from infra.database.models import ExampleDocument
 
 
 class BeanieExampleRepository(ExampleRepository):
@@ -26,7 +25,7 @@ class BeanieExampleRepository(ExampleRepository):
         await document.insert()
         return entity
 
-    async def get_by_id(self, entity_id: UUID) -> Optional[ExampleEntity]:
+    async def get_by_id(self, entity_id: UUID) -> ExampleEntity | None:
         """Get entity by ID."""
         document = await ExampleDocument.get(entity_id)
         if not document:
@@ -34,7 +33,7 @@ class BeanieExampleRepository(ExampleRepository):
 
         return self._to_entity(document)
 
-    async def get_by_email(self, email: str) -> Optional[ExampleEntity]:
+    async def get_by_email(self, email: str) -> ExampleEntity | None:
         """Get entity by email."""
         document = await ExampleDocument.find_one(ExampleDocument.email == email)
         if not document:
@@ -42,9 +41,7 @@ class BeanieExampleRepository(ExampleRepository):
 
         return self._to_entity(document)
 
-    async def list(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[ExampleEntity]:
+    async def list(self, skip: int = 0, limit: int = 100) -> list[ExampleEntity]:
         """List entities with pagination."""
         documents = await ExampleDocument.find_all().skip(skip).limit(limit).to_list()
         return [self._to_entity(doc) for doc in documents]

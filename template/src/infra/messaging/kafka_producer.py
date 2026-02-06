@@ -6,8 +6,8 @@ from typing import Any
 import fastavro
 from aiokafka import AIOKafkaProducer
 
-from {{ project_slug }}.infrastructure.config.logging import get_logger
-from {{ project_slug }}.infrastructure.config.settings import Settings
+from infra.logging import get_logger
+from config import Settings
 
 logger = get_logger(__name__)
 
@@ -25,14 +25,14 @@ class KafkaProducer:
             cls._settings = settings
 
             cls._producer = AIOKafkaProducer(
-                bootstrap_servers=settings.kafka_bootstrap_servers.split(","),
+                bootstrap_servers=settings.kafka.bootstrap_servers.split(","),
                 value_serializer=cls._serialize_avro,
             )
 
             await cls._producer.start()
             logger.info(
                 "kafka_producer_started",
-                bootstrap_servers=settings.kafka_bootstrap_servers,
+                bootstrap_servers=settings.kafka.bootstrap_servers,
             )
         except Exception as e:
             logger.error("kafka_producer_start_failed", error=str(e))

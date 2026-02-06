@@ -16,12 +16,13 @@ Answer the prompts:
 - Python version: `3.12`
 - Include authentication: `Yes`
 - Include observability: `Yes`
+- Include launchdarkly: `Yes`
 
 ## Step 2: Review Generated Structure
 
 ```
 user-service/
-├── src/user_service/
+├── src/
 │   ├── domain/
 │   │   ├── entities/example.py       # Replace with user.py
 │   │   └── events/example_events.py  # Replace with user_events.py
@@ -158,7 +159,7 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 from typing import Optional
 
-from user_service.domain.entities.user import User
+from domain.entities.user import User
 
 class UserRepository(ABC):
     @abstractmethod
@@ -192,11 +193,11 @@ class UserRepository(ABC):
 from uuid import UUID
 from passlib.context import CryptContext
 
-from user_service.application.dto.user_dto import RegisterUserDTO, UserDTO
-from user_service.application.ports.repositories.user_repository import UserRepository
-from user_service.application.ports.messaging.event_publisher import EventPublisher
-from user_service.domain.entities.user import User
-from user_service.domain.events.user_events import UserRegisteredEvent
+from application.dto.user_dto import RegisterUserDTO, UserDTO
+from application.ports.repositories.user_repository import UserRepository
+from application.ports.messaging.event_publisher import EventPublisher
+from domain.entities.user import User
+from domain.events.user_events import UserRegisteredEvent
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -283,9 +284,9 @@ def get_document_models():
 from typing import Optional
 from uuid import UUID
 
-from user_service.application.ports.repositories.user_repository import UserRepository
-from user_service.domain.entities.user import User, UserRole
-from user_service.infrastructure.database.models import UserDocument
+from application.ports.repositories.user_repository import UserRepository
+from domain.entities.user import User, UserRole
+from infrastructure.database.models import UserDocument
 
 class BeanieUserRepository(UserRepository):
     async def create(self, user: User) -> User:
@@ -332,9 +333,9 @@ class BeanieUserRepository(UserRepository):
 ```python
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from user_service.application.dto.user_dto import RegisterUserDTO, UserDTO
-from user_service.application.use_cases.user_use_cases import RegisterUserUseCase
-from user_service.presentation.api.v1.dependencies import get_register_user_use_case
+from application.dto.user_dto import RegisterUserDTO, UserDTO
+from application.use_cases.user_use_cases import RegisterUserUseCase
+from presentation.api.v1.dependencies import get_register_user_use_case
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -365,12 +366,12 @@ async def register_user(
 async def user_event_handler(message: dict) -> None:
     """Handle user events."""
     event_type = message.get("event_type")
-    
+
     if event_type == "user.registered":
         # Send welcome email
         logger.info("sending_welcome_email", user_id=message.get("user_id"))
         # Implement email sending logic
-    
+
     elif event_type == "user.email_verified":
         # Update analytics
         logger.info("user_verified", user_id=message.get("user_id"))
@@ -405,9 +406,9 @@ curl -X POST http://localhost:8000/api/v1/users/register \
 def test_user_verify_email():
     user = User(email="test@example.com", username="test")
     assert user.email_verified is False
-    
+
     user.verify_email()
-    
+
     assert user.email_verified is True
 
 # tests/integration/test_user_api.py
@@ -421,7 +422,7 @@ async def test_register_user():
                 "password": "SecurePass123",
             },
         )
-        
+
         assert response.status_code == 201
         data = response.json()
         assert data["email"] == "new@example.com"

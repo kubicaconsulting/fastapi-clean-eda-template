@@ -3,9 +3,9 @@
 from dataclasses import asdict
 from typing import Any
 
-from {{ project_slug }}.application.ports.messaging.event_publisher import EventPublisher
-from {{ project_slug }}.domain.events.example_events import DomainEvent
-from {{ project_slug }}.infrastructure.messaging.kafka_producer import KafkaProducer
+from application.ports.messaging.event_publisher import EventPublisher
+from application.domain.events.example_events import DomainEvent
+from infra.messaging.kafka_producer import KafkaProducer
 
 
 class KafkaEventPublisher(EventPublisher):
@@ -32,9 +32,7 @@ class KafkaEventPublisher(EventPublisher):
             key=str(event.event_id),
         )
 
-    async def publish_batch(
-        self, events: list[tuple[DomainEvent, str]]
-    ) -> None:
+    async def publish_batch(self, events: list[tuple[DomainEvent, str]]) -> None:
         """Publish multiple events in a batch."""
         # Group events by topic
         topics_events: dict[str, list[dict[str, Any]]] = {}
@@ -54,7 +52,8 @@ class KafkaEventPublisher(EventPublisher):
 
         # Convert all values to strings for the simple schema
         payload = {
-            k: str(v) for k, v in event_dict.items()
+            k: str(v)
+            for k, v in event_dict.items()
             if k not in ["event_id", "event_type", "timestamp"]
         }
 

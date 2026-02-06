@@ -63,5 +63,25 @@ use_observability:
   help: Include OpenTelemetry tracing?
   default: true
 
+use_launchdarkly:
+  type: bool
+  help: Include LaunchDarkly feature manager?
+  default: true
+
+use_ratelimiting:
+  type: bool
+  help: Include Rate limiting?
+  default: true
+
+use_caching:
+  type: bool
+  help: Include redis for caching?
+  default: true
+
+use_kafka:
+  type: bool
+  help: Include Kafka EDA?
+  default: true
+
 # Versioning
 _min_copier_version: "9.0.0"

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
-from {{ project_slug }}.domain.entities.example import ExampleEntity
+from domain.entities.example import ExampleEntity
 
 
 class ExampleRepository(ABC):
@@ -26,9 +26,7 @@ class ExampleRepository(ABC):
         pass
 
     @abstractmethod
-    async def list(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[ExampleEntity]:
+    async def list(self, skip: int = 0, limit: int = 100) -> list[ExampleEntity]:
         """List entities with pagination."""
         pass
 

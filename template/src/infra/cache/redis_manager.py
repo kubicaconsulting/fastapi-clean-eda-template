@@ -6,8 +6,8 @@ from typing import Any
 import redis.asyncio as redis
 from redis.asyncio import Redis
 
-from {{ project_slug }}.infrastructure.config.logging import get_logger
-from {{ project_slug }}.infrastructure.config.settings import Settings
+from infra.logging import get_logger
+from config import Settings
 
 logger = get_logger(__name__)
 
@@ -23,13 +23,13 @@ class RedisManager:
         """Initialize Redis connection."""
         try:
             cls._settings = settings
-            redis_url = str(settings.redis_url)
+            redis_url = str(settings.redis.url)
 
             cls._client = redis.from_url(
                 redis_url,
-                max_connections=settings.redis_max_connections,
-                socket_timeout=settings.redis_socket_timeout,
-                socket_connect_timeout=settings.redis_socket_connect_timeout,
+                max_connections=settings.redis.max_connections,
+                socket_timeout=settings.redis.socket_timeout,
+                socket_connect_timeout=settings.redis.socket_connect_timeout,
                 decode_responses=True,
             )
 
@@ -66,7 +66,7 @@ class RedisManager:
         if not settings:
             raise RuntimeError("Redis settings not initialized")
 
-        full_key = f"{settings.cache_key_prefix}{key}"
+        full_key = f"{settings.cache.key_prefix}{key}"
 
         try:
             value = await client.get(full_key)
@@ -78,9 +78,7 @@ class RedisManager:
             return None
 
     @classmethod
-    async def set(
-        cls, key: str, value: Any, ttl: int | None = None
-    ) -> bool:
+    async def set(cls, key: str, value: Any, ttl: int | None = None) -> bool:
         """Set value in cache with optional TTL."""
         client = cls.get_client()
         settings = cls._settings
@@ -106,7 +104,7 @@ class RedisManager:
         if not settings:
             raise RuntimeError("Redis settings not initialized")
 
-        full_key = f"{settings.cache_key_prefix}{key}"
+        full_key = f"{settings.cache.key_prefix}{key}"
 
         try:
             await client.delete(full_key)
@@ -133,7 +131,7 @@ class RedisManager:
         if not settings:
             raise RuntimeError("Redis settings not initialized")
 
-        rate_key = f"{settings.cache_key_prefix}rate:{key}"
+        rate_key = f"{settings.cache.key_prefix}rate:{key}"
 
         try:
             pipe = client.pipeline()

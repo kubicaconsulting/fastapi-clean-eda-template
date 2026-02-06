@@ -14,8 +14,8 @@ class ExampleDocument(Document):
     email: Indexed(EmailStr, unique=True)  # type: ignore
     is_active: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now())
+    updated_at: datetime = Field(default_factory=datetime.now())
 
     class Settings:
         """Beanie settings."""
