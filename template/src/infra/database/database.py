@@ -5,10 +5,11 @@ from typing import Any
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from infra.logging import get_logger
+from infra.logging import logger
 from config import Settings
 
-logger = get_logger(__name__)
+# Import all document models here
+from infra.database.models import get_document_models
 
 
 class Database:
@@ -24,6 +25,7 @@ class Database:
             # Parse MongoDB URL
             mongodb_url = str(settings.database.url)
 
+            # Create Async client
             cls.client = AsyncIOMotorClient(
                 mongodb_url,
                 minPoolSize=settings.database.min_pool_size,
@@ -31,9 +33,7 @@ class Database:
             )
             cls.database_name = settings.database.name
 
-            # Import all document models here
-            from src.infra.database.models import get_document_models
-
+            # Initialize beanie with the Sample document class and a database
             await init_beanie(
                 database=cls.client[cls.database_name],
                 document_models=get_document_models(),

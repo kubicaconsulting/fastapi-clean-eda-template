@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from infra.errors import ValidationException, ResourceNotFoundException
 from application.dto.example_dto import (

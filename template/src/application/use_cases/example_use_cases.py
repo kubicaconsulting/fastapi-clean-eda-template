@@ -8,9 +8,7 @@ from application.dto.example_dto import CreateExampleDTO, ExampleDTO
 # from domain.events.example_events import ExampleCreatedEvent
 from application.ports.repositories.example_repository import ExampleRepository
 from domain.entities.example import ExampleEntity
-from infra.logging import get_logger
-
-logger = get_logger(__name__)
+from infra.logging import logger
 
 
 class CreateExampleUseCase:

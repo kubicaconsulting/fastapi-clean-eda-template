@@ -68,11 +68,6 @@ use_launchdarkly:
   help: Include LaunchDarkly feature manager?
   default: true
 
-use_ratelimiting:
-  type: bool
-  help: Include Rate limiting?
-  default: true
-
 use_caching:
   type: bool
   help: Include redis for caching?

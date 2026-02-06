@@ -2,9 +2,7 @@
 
 from uuid import UUID
 
-from application.ports.repositories.example_repository import (
-    ExampleRepository,
-)
+from application.ports.repositories.example_repository import ExampleRepository
 from application.domain.entities.example import ExampleEntity
 from infra.database.models import ExampleDocument
 

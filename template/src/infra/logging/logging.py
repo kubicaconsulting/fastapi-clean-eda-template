@@ -1,80 +1,50 @@
 """Structured logging configuration."""
 
-import logging
 import sys
-from typing import Any
+import json
+import traceback
 
-import structlog
-from structlog.typing import EventDict, Processor
+from loguru import logger
 
-
-def add_correlation_id(
-    logger: Any, method_name: str, event_dict: EventDict
-) -> EventDict:
-    """Add correlation ID to log events."""
-    from contextvars import ContextVar
-
-    correlation_id_var: ContextVar[str | None] = ContextVar(
-        "correlation_id", default=None
-    )
-    correlation_id = correlation_id_var.get()
-    if correlation_id:
-        event_dict["correlation_id"] = correlation_id
-    return event_dict
+from config.main import get_settings
 
 
-def setup_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
-    """Setup structured logging."""
-    shared_processors: list[Processor] = [
-        structlog.contextvars.merge_contextvars,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        add_correlation_id,
-    ]
+settings = get_settings()
 
-    if json_logs:
-        # JSON output for production
-        shared_processors.append(structlog.processors.format_exc_info)
-        renderer = structlog.processors.JSONRenderer()
-    else:
-        # Human-readable output for development
-        shared_processors.append(structlog.dev.set_exc_info)
-        renderer = structlog.dev.ConsoleRenderer()
-
-    structlog.configure(
-        processors=shared_processors
-        + [
-            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
-        ],
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
-
-    formatter = structlog.stdlib.ProcessorFormatter(
-        foreign_pre_chain=shared_processors,
-        processors=[
-            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-            renderer,
-        ],
-    )
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-
-    root_logger = logging.getLogger()
-    root_logger.addHandler(handler)
-    root_logger.setLevel(log_level.upper())
-
-    # Silence noisy libraries
-    logging.getLogger("aiokafka").setLevel(logging.WARNING)
-    logging.getLogger("kafka").setLevel(logging.WARNING)
-    logging.getLogger("motor").setLevel(logging.WARNING)
+# Set up base logging level
+log_level = "DEBUG" if settings.debug else "INFO"
 
 
-def get_logger(name: str) -> Any:
-    """Get a structured logger instance."""
-    return structlog.get_logger(name)
+def serialize(record):
+    fields = {
+        "time": record["time"].strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+        "level": record["level"].name,
+        "message": record["message"],
+        "context": {
+            **record["extra"],
+        },
+    }
+
+    if record["exception"]:
+        exc = record["exception"]
+        fields["exception"] = {
+            "type": exc.type.__name__,
+            "value": str(exc.value),
+            "traceback": traceback.format_exception(exc.type, exc.value, exc.traceback),
+        }
+
+    return json.dumps(fields)
+
+
+def patching(record):
+    record["serialized"] = serialize(record)
+
+
+logger.remove(0)
+logger = logger.patch(patching)
+logger.add(
+    sys.stderr,
+    level=log_level,
+    enqueue=True,  # non-blocking and safe across threads/processes
+    format="{serialized}\n",
+)

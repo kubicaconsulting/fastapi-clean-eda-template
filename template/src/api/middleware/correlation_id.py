@@ -6,6 +6,8 @@ from contextvars import ContextVar
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from infra.logging import logger
+
 # Context variable for correlation ID
 correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
 
@@ -21,10 +23,12 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         # Set in context for logging
         correlation_id_var.set(correlation_id)
 
-        # Process request
-        response = await call_next(request)
+        # Add correlation_id to the logging context for the duration of the request
+        with logger.contextualize(correlation_id=correlation_id):
+            # Process request
+            response = await call_next(request)
 
-        # Add to response headers
-        response.headers["X-Correlation-ID"] = correlation_id
+            # Add to response headers
+            response.headers["X-Correlation-ID"] = correlation_id
 
-        return response
+            return response

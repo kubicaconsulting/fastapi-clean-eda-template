@@ -1,10 +1,8 @@
 from fastapi import Request, status as HTTPStatus
 from fastapi.responses import JSONResponse
 
-from infra.logging import get_logger
+from infra.logging import logger
 from template.src.infra.errors.operational_exception import OperationalException
-
-logger = get_logger(__name__)
 
 
 async def app_exception_handler(
